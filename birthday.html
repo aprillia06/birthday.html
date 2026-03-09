@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mission: Birthday 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────
+   BASE
+───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --space:   #020a18;
+  --space2:  #040d22;
+  --cyan:    #00d4ff;
+  --purple:  #7b2fff;
+  --orange:  #ff6b35;
+  --teal:    #00ffd1;
+  --white:   #e8f4ff;
+  --dimwhite:rgba(232,244,255,.65);
+  --glow-c:  rgba(0,212,255,.35);
+  --glow-p:  rgba(123,47,255,.35);
+}
+html,body{height:100%;overflow:hidden;background:var(--space);font-family:'Exo 2',sans-serif;color:var(--white);cursor:default}
+
+/* ─────────────────────────────────────────
+   STAR CANVAS
+───────────────────────────────────────── */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ─────────────────────────────────────────
+   NEBULA BACKGROUND LAYERS
+───────────────────────────────────────── */
+.nebula{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 40% at 15% 20%,  rgba(123,47,255,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 35% at 85% 75%,  rgba(0,212,255,.14)  0%, transparent 65%),
+    radial-gradient(ellipse 35% 50% at 70% 10%,  rgba(255,107,53,.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 50% 50%,  rgba(0,20,60,.5)     0%, transparent 100%);
+}
+
+/* ─────────────────────────────────────────
+   SVG SPACE OBJECTS LAYER
+───────────────────────────────────────── */
+.space-layer{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+
+/* Planet Saturn-like */
+.planet-saturn{
+  position:absolute;top:6%;left:-40px;
+  animation:floatPlanet 20s ease-in-out infinite;
+  filter:drop-shadow(0 0 30px rgba(0,212,255,.4));
+}
+@keyframes floatPlanet{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(18px) rotate(5deg)}}
+
+/* Planet Mars-like */
+.planet-mars{
+  position:absolute;bottom:8%;right:-20px;
+  animation:floatPlanet 26s ease-in-out infinite reverse;
+  filter:drop-shadow(0 0 25px rgba(255,107,53,.5));
+}
+
+/* Planet small purple */
+.planet-mini{
+  position:absolute;top:55%;left:3%;
+  animation:floatPlanet 18s ease-in-out infinite 4s;
+  filter:drop-shadow(0 0 20px rgba(123,47,255,.5));
+}
+
+/* Astronaut */
+.astronaut{
+  position:absolute;top:12%;right:6%;
+  animation:astronautFloat 8s ease-in-out infinite;
+  filter:drop-shadow(0 0 18px rgba(0,212,255,.3));
+}
+@keyframes astronautFloat{
+  0%,100%{transform:translateY(0) rotate(-4deg)}
+  33%    {transform:translateY(-16px) rotate(3deg)}
+  66%    {transform:translateY(8px) rotate(-2deg)}
+}
+
+/* Meteor/shooting star */
+.meteor{
+  position:absolute;
+  width:var(--mw,120px);height:2px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);
+  border-radius:2px;
+  top:var(--mt,20%);left:var(--ml,-10%);
+  transform:rotate(-30deg);
+  animation:meteor var(--md,3s) var(--mde,0s) ease-in infinite;
+  opacity:0;
+}
+@keyframes meteor{
+  0%  {opacity:0;transform:rotate(-30deg) translateX(0)}
+  5%  {opacity:1}
+  80% {opacity:.8}
+  100%{opacity:0;transform:rotate(-30deg) translateX(120vw)}
+}
+
+/* Satellite */
+.satellite{
+  position:absolute;top:40%;right:-60px;
+  animation:orbitSat 30s linear infinite;
+  filter:drop-shadow(0 0 10px rgba(0,255,209,.4));
+}
+@keyframes orbitSat{
+  0%  {right:-60px;top:35%}
+  25% {right:20%;top:5%}
+  50% {right:110%;top:15%}
+  100%{right:-60px;top:35%}
+}
+
+/* Small stars sparkle */
+.sparkle{
+  position:absolute;color:var(--cyan);
+  font-size:var(--spk-s,14px);
+  animation:sparkleTwinkle var(--spk-d,2s) var(--spk-de,0s) ease-in-out infinite;
+  opacity:0;
+}
+@keyframes sparkleTwinkle{0%,100%{opacity:0;transform:scale(.5) rotate(0deg)}50%{opacity:.9;transform:scale(1.2) rotate(180deg)}}
+
+/* ─────────────────────────────────────────
+   COUNTDOWN SCREEN
+───────────────────────────────────────── */
+#countdown-screen{
+  position:fixed;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .9s ease,transform .9s ease;
+}
+#countdown-screen.hide{opacity:0;transform:scale(1.08);pointer-events:none}
+
+.cd-mission-label{
+  font-family:'Orbitron',monospace;
+  font-size:11px;font-weight:400;
+  letter-spacing:5px;
+  text-transform:uppercase;
+  color:var(--cyan);
+  margin-bottom:40px;
+  opacity:.8;
+  animation:scanBlink 2s ease-in-out infinite;
+}
+@keyframes scanBlink{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* Countdown ring */
+.cd-outer{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+.cd-svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.cd-track{fill:none;stroke:rgba(0,212,255,.1);stroke-width:2}
+.cd-prog{
+  fill:none;stroke:url(#cdGrad);stroke-width:2.5;stroke-linecap:round;
+  stroke-dasharray:659;stroke-dashoffset:659;
+  transition:stroke-dashoffset 1s linear;
+  filter:drop-shadow(0 0 6px var(--cyan));
+}
+/* outer glow ring */
+.cd-glow-ring{
+  position:absolute;inset:-12px;border-radius:50%;
+  border:1px solid rgba(0,212,255,.15);
+  box-shadow:0 0 30px rgba(0,212,255,.08),inset 0 0 30px rgba(0,212,255,.05);
+  animation:ringPulse 3s ease-in-out infinite;
+}
+@keyframes ringPulse{0%,100%{box-shadow:0 0 20px rgba(0,212,255,.08)}50%{box-shadow:0 0 50px rgba(0,212,255,.2)}}
+
+#cd-number{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(80px,20vw,110px);
+  font-weight:900;
+  line-height:1;
+  color:var(--white);
+  text-shadow:0 0 40px var(--cyan),0 0 80px rgba(0,212,255,.3);
+  transition:transform .12s cubic-bezier(.22,1,.36,1),opacity .12s;
+  position:relative;z-index:2;
+  letter-spacing:-2px;
+}
+#cd-number.pop{transform:scale(1.15);opacity:.4}
+
+.cd-status{
+  margin-top:28px;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:rgba(255,255,255,.3);font-weight:300;
+}
+
+/* scan line animation */
+.scanline{
+  position:fixed;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,.3),transparent);
+  animation:scanMove 4s linear infinite;
+  z-index:19;pointer-events:none;
+  box-shadow:0 0 12px rgba(0,212,255,.2);
+}
+@keyframes scanMove{0%{top:-2px}100%{top:100%}}
+
+/* HUD corners */
+.hud-corner{
+  position:fixed;width:40px;height:40px;z-index:18;pointer-events:none;
+  border-color:rgba(0,212,255,.35);border-style:solid;
+}
+.hud-corner.tl{top:20px;left:20px;border-width:2px 0 0 2px}
+.hud-corner.tr{top:20px;right:20px;border-width:2px 2px 0 0}
+.hud-corner.bl{bottom:20px;left:20px;border-width:0 0 2px 2px}
+.hud-corner.br{bottom:20px;right:20px;border-width:0 2px 2px 0}
+
+/* ─────────────────────────────────────────
+   CAPSULE STAGE
+───────────────────────────────────────── */
+#capsule-stage{
+  position:fixed;inset:0;z-index:15;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .8s ease;
+}
+#capsule-stage.show{opacity:1;pointer-events:all}
+
+.cap-label{
+  font-family:'Orbitron',monospace;font-size:11px;letter-spacing:4px;
+  color:var(--cyan);opacity:0;margin-bottom:32px;
+  text-transform:uppercase;
+  transition:opacity .6s ease .5s;
+}
+#capsule-stage.show .cap-label{opacity:.7}
+
+/* ── The Capsule ── */
+.capsule-wrap{
+  position:relative;cursor:pointer;
+  transition:transform .3s ease;
+}
+.capsule-wrap:hover{transform:translateY(-6px) scale(1.02)}
+
+.capsule{
+  width:260px;height:160px;
+  position:relative;
+  transition:all .3s ease;
+}
+
+/* body */
+.cap-body{
+  position:absolute;inset:0;
+  background:linear-gradient(145deg,#0d1f3c,#081428);
+  border:1px solid rgba(0,212,255,.25);
+  border-radius:8px 8px 18px 18px;
+  box-shadow:
+    0 0 0 1px rgba(0,212,255,.08),
+    0 20px 60px rgba(0,0,0,.7),
+    0 0 40px rgba(0,212,255,.08),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  overflow:hidden;
+}
+/* gloss reflection */
+.cap-body::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(to bottom,rgba(255,255,255,.05),transparent);
+  pointer-events:none;
+}
+
+/* grid lines inside */
+.cap-body::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+  background-size:20px 20px;
+}
+
+/* top flap */
+.cap-flap{
+  position:absolute;top:0;left:0;right:0;height:50%;
+  transform-origin:top center;
+  transform-style:preserve-3d;
+  transition:transform .75s cubic-bezier(.22,1,.36,1);
+  z-index:3;
+}
+.cap-flap-face{
+  position:absolute;inset:0;
+  background:linear-gradient(160deg,#112040,#0a1830);
+  border:1px solid rgba(0,212,255,.2);
+  border-radius:8px 8px 0 0;
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  box-shadow:inset 0 -6px 16px rgba(0,212,255,.06);
+}
+.capsule.open .cap-flap{transform:rotateX(-180deg)}
+
+/* seal */
+.cap-seal{
+  position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+  width:44px;height:44px;
+  background:radial-gradient(circle at 35% 35%,#1a4a7a,#0a2040);
+  border:1px solid rgba(0,212,255,.4);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;z-index:5;
+  box-shadow:0 0 20px rgba(0,212,255,.3),inset 0 1px 0 rgba(255,255,255,.1);
+  transition:transform .3s ease,box-shadow .3s ease;
+}
+.capsule-wrap:hover .cap-seal{
+  box-shadow:0 0 35px rgba(0,212,255,.5),inset 0 1px 0 rgba(255,255,255,.1);
+  transform:translateX(-50%) scale(1.08);
+}
+
+/* inner card peek */
+.cap-inner-peek{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  width:220px;height:100px;
+  background:linear-gradient(160deg,#0a1830,#060f20);
+  border-radius:4px;
+  border:1px solid rgba(0,212,255,.12);
+  z-index:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .65s cubic-bezier(.22,1,.36,1) .3s;
+  overflow:hidden;
+}
+.cap-inner-peek::before{
+  content:''; position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 3px,rgba(0,212,255,.03) 3px,rgba(0,212,255,.03) 4px
+  );
+}
+.cap-inner-peek span{
+  font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;
+  color:rgba(0,212,255,.4);text-transform:uppercase;
+}
+.capsule.open .cap-inner-peek{transform:translateX(-50%) translateY(-110px)}
+
+/* signal rings around capsule */
+.cap-signal{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;border:1px solid rgba(0,212,255,.2);
+  animation:signalOut 2.5s ease-out var(--sig-d,0s) infinite;
+  pointer-events:none;
+}
+@keyframes signalOut{
+  from{width:0;height:0;opacity:.8}
+  to  {width:320px;height:320px;margin:-160px;opacity:0}
+}
+
+/* ─────────────────────────────────────────
+   CARD / MESSAGE SCREEN
+───────────────────────────────────────── */
+#card-screen{
+  position:fixed;inset:0;z-index:25;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;opacity:0;pointer-events:none;
+  transition:opacity .9s ease;
+  overflow-y:auto;
+}
+#card-screen.show{opacity:1;pointer-events:all}
+
+.card{
+  position:relative;
+  background:linear-gradient(145deg,rgba(10,24,56,.95),rgba(4,13,34,.98));
+  border:1px solid rgba(0,212,255,.18);
+  border-radius:12px;
+  padding:18px 16px 20px;
+  width:260px;
+  height:160px;
+  text-align:center;
+  backdrop-filter:blur(24px);
+  box-shadow:
+    0 0 0 1px rgba(0,212,255,.06),
+    0 0 40px rgba(0,212,255,.15),
+    0 20px 60px rgba(0,0,0,.8),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  animation:cardDrift .9s cubic-bezier(.22,1,.36,1) both;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(0,212,255,.2) transparent;
+}
+.card::-webkit-scrollbar{width:2px}
+.card::-webkit-scrollbar-track{background:transparent}
+.card::-webkit-scrollbar-thumb{background:rgba(0,212,255,.2);border-radius:2px}
+@keyframes cardDrift{from{transform:translateY(40px) scale(.95);opacity:0}to{transform:none;opacity:1}}
+
+/* grid bg */
+.card::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);
+  background-size:30px 30px;
+  pointer-events:none;
+}
+
+/* top accent bar */
+.card-topbar{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent);
+  border-radius:12px 12px 0 0;
+}
+
+/* corner marks */
+.card-corner{position:absolute;width:8px;height:8px;border-color:rgba(0,212,255,.3);border-style:solid}
+.card-corner.tl{top:8px;left:8px;border-width:1px 0 0 1px}
+.card-corner.tr{top:8px;right:8px;border-width:1px 1px 0 0}
+.card-corner.bl{bottom:8px;left:8px;border-width:0 0 1px 1px}
+.card-corner.br{bottom:8px;right:8px;border-width:0 1px 1px 0}
+
+/* gloss */
+.card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:35%;
+  background:linear-gradient(to bottom,rgba(255,255,255,.025),transparent);
+  pointer-events:none;border-radius:12px 12px 0 0;
+}
+
+.card-icon{
+  font-size:22px;margin-bottom:4px;
+  animation:iconFloat 4s ease-in-out infinite;
+  filter:drop-shadow(0 0 10px rgba(0,212,255,.5));
+  display:block;position:relative;z-index:1;
+}
+@keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.card-tag{
+  font-family:'Orbitron',monospace;font-size:7px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--cyan);opacity:.7;
+  margin-bottom:4px;position:relative;z-index:1;
+}
+
+.card-title{
+  font-family:'Orbitron',monospace;
+  font-size:14px;font-weight:900;
+  color:var(--white);
+  text-shadow:0 0 20px rgba(0,212,255,.4);
+  letter-spacing:2px;margin-bottom:2px;
+  position:relative;z-index:1;
+  line-height:1.2;
+}
+
+.card-name{
+  font-family:'Orbitron',monospace;
+  font-size:12px;font-weight:700;
+  background:linear-gradient(135deg,var(--cyan),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 10px rgba(0,212,255,.5));
+  margin-bottom:6px;position:relative;z-index:1;
+}
+
+.card-divider{
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;position:relative;z-index:1;
+}
+.card-divider::before,.card-divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,.3),transparent);
+}
+.card-divider span{font-size:10px;color:var(--cyan);opacity:.6}
+
+.card-message{
+  font-size:9px;line-height:1.7;
+  color:var(--dimwhite);font-weight:300;
+  margin-bottom:8px;position:relative;z-index:1;
+  font-style:italic;
+}
+.card-message strong{color:var(--cyan);font-style:normal;font-weight:600}
+
+.card-tags{
+  display:flex;flex-wrap:wrap;gap:4px;justify-content:center;
+  margin-bottom:8px;position:relative;z-index:1;
+}
+.card-badge{
+  background:rgba(0,212,255,.07);
+  border:1px solid rgba(0,212,255,.18);
+  border-radius:3px;padding:2px 7px;
+  font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;
+  color:var(--cyan);text-transform:uppercase;
+}
+
+.card-sign{
+  font-family:'Exo 2',sans-serif;font-style:italic;
+  font-size:8px;color:rgba(255,255,255,.35);
+  position:relative;z-index:1;
+}
+.card-sign span{
+  font-family:'Orbitron',monospace;font-style:normal;font-weight:700;
+  color:var(--purple);font-size:9px;
+  text-shadow:0 0 12px var(--purple);
+}
+
+/* stagger reveal */
+.card>*{animation:fadeUp .6s ease both}
+.card>*:nth-child(1){animation-delay:.1s}.card>*:nth-child(2){animation-delay:.2s}
+.card>*:nth-child(3){animation-delay:.3s}.card>*:nth-child(4){animation-delay:.4s}
+.card>*:nth-child(5){animation-delay:.5s}.card>*:nth-child(6){animation-delay:.6s}
+.card>*:nth-child(7){animation-delay:.7s}.card>*:nth-child(8){animation-delay:.8s}
+.card>*:nth-child(9){animation-delay:.9s}.card>*:nth-child(10){animation-delay:1s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* particles */
+.particle{
+  position:fixed;top:-10px;pointer-events:none;z-index:30;opacity:0;
+  animation:pfall var(--pt,5s) var(--pd,0s) ease-in infinite;
+}
+@keyframes pfall{
+  0%{top:-10px;opacity:1;transform:rotate(0) translateX(0)}
+  100%{top:110vh;opacity:0;transform:rotate(720deg) translateX(var(--px,40px))}
+}
+
+/* ─────────────────────────────────────────
+   LOGOUT BUTTON
+───────────────────────────────────────── */
+#logout-btn{
+  position:fixed;bottom:28px;right:28px;z-index:40;
+  display:none;
+  align-items:center;gap:8px;
+  background:rgba(4,13,34,.75);
+  border:1px solid rgba(0,212,255,.22);
+  border-radius:6px;
+  padding:9px 18px;
+  color:rgba(0,212,255,.7);
+  font-family:'Orbitron',monospace;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;
+  backdrop-filter:blur(12px);
+  box-shadow:0 0 20px rgba(0,212,255,.08),inset 0 1px 0 rgba(255,255,255,.04);
+  transition:border-color .25s,color .25s,box-shadow .25s,transform .2s;
+}
+#logout-btn:hover{
+  border-color:rgba(0,212,255,.55);
+  color:var(--cyan);
+  box-shadow:0 0 30px rgba(0,212,255,.2),0 0 8px rgba(0,212,255,.15),inset 0 1px 0 rgba(255,255,255,.06);
+  transform:translateY(-2px);
+}
+#logout-btn:active{ transform:scale(.96); }
+#logout-btn .btn-icon{ font-size:14px; transition:transform .3s ease; }
+#logout-btn:hover .btn-icon{ transform:translateX(3px) rotate(15deg); }
+#logout-btn.visible{ display:flex; animation:btnAppear .5s cubic-bezier(.22,1,.36,1) both; }
+@keyframes btnAppear{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ─────────────────────────────────────────
+   LOGOUT OVERLAY
+───────────────────────────────────────── */
+#logout-overlay{
+  position:fixed;inset:0;z-index:100;
+  display:none;pointer-events:none;
+  background:#020a18;
+  opacity:0;
+}
+#logout-overlay.active{
+  display:block;pointer-events:all;
+}
+
+/* Warp tunnel canvas */
+#warp-canvas{
+  position:absolute;inset:0;
+  opacity:0;transition:opacity .4s ease;
+}
+#warp-canvas.show{ opacity:1; }
+
+/* Rocket */
+#logout-rocket{
+  position:absolute;
+  left:50%;bottom:-120px;
+  transform:translateX(-50%);
+  font-size:56px;
+  filter:drop-shadow(0 0 24px rgba(0,212,255,.6)) drop-shadow(0 0 48px rgba(123,47,255,.4));
+  transition:bottom 1.4s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+  z-index:3;
+}
+#logout-rocket.launch{
+  bottom:110%;
+  opacity:0;
+}
+
+/* Rocket flame trail */
+#logout-rocket::after{
+  content:'🔥';
+  position:absolute;
+  bottom:-32px;left:50%;
+  transform:translateX(-50%) rotate(180deg) scaleY(0);
+  font-size:28px;
+  transition:transform .3s ease .1s;
+}
+#logout-rocket.launch::after{
+  transform:translateX(-50%) rotate(180deg) scaleY(1);
+}
+
+/* Glitch text flicker */
+.logout-glitch{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  z-index:4;
+  opacity:0;
+  pointer-events:none;
+}
+.logout-glitch.show{ animation:glitchReveal .6s ease forwards; }
+@keyframes glitchReveal{
+  0%  {opacity:0;transform:translate(-50%,-50%) scale(.9)}
+  30% {opacity:1;transform:translate(-52%,-50%) scale(1.02)}
+  60% {transform:translate(-49%,-50%) scale(.99)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+
+.logout-title{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(16px,4vw,28px);
+  font-weight:900;letter-spacing:4px;
+  color:var(--cyan);
+  text-shadow:0 0 30px var(--cyan),0 0 60px rgba(0,212,255,.4);
+  text-transform:uppercase;
+  animation:textFlicker 3s ease-in-out infinite;
+}
+@keyframes textFlicker{
+  0%,100%{opacity:1}
+  92%{opacity:1}93%{opacity:.2}94%{opacity:1}97%{opacity:.5}98%{opacity:1}
+}
+
+.logout-sub{
+  font-family:'Orbitron',monospace;
+  font-size:10px;letter-spacing:5px;
+  color:rgba(0,212,255,.45);
+  margin-top:10px;text-transform:uppercase;
+  animation:scanBlink 1.5s ease-in-out infinite;
+}
+
+.logout-bar-wrap{
+  width:180px;height:2px;
+  background:rgba(0,212,255,.1);
+  border-radius:2px;
+  margin:18px auto 0;
+  overflow:hidden;
+}
+.logout-bar{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--cyan),var(--purple));
+  border-radius:2px;
+  box-shadow:0 0 8px var(--cyan);
+  transition:width 2s linear;
+}
+.logout-bar.fill{ width:100%; }
+
+/* static / noise overlay */
+.logout-static{
+  position:absolute;inset:0;z-index:2;
+  opacity:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  animation:staticFlash 0s linear infinite;
+}
+.logout-static.show{ animation:staticFlash .08s linear infinite; opacity:.25; }
+@keyframes staticFlash{ 0%{background-position:0 0}100%{background-position:200px 200px} }
+
+/* Final black fade */
+#logout-blackout{
+  position:absolute;inset:0;z-index:5;
+  background:#000;opacity:0;pointer-events:none;
+  transition:opacity 1s ease;
+}
+#logout-blackout.fade{ opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- CANVAS -->
+<canvas id="starfield"></canvas>
+<div class="nebula"></div>
+
+<!-- ── SPACE OBJECTS ── -->
+<div class="space-layer">
+
+  <!-- Saturn-like planet -->
+  <div class="planet-saturn">
+    <svg width="170" height="110" viewBox="0 0 170 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="satGrad" cx="40%" cy="35%" r="60%">
+          <stop offset="0%"   stop-color="#1a6ea8"/>
+          <stop offset="50%"  stop-color="#0d4070"/>
+          <stop offset="100%" stop-color="#071830"/>
+        </radialGradient>
+        <radialGradient id="satShine" cx="35%" cy="30%" r="50%">
+          <stop offset="0%"   stop-color="rgba(0,212,255,.25)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <ellipse id="satBody" cx="85" cy="60" rx="46" ry="46"/>
+        <clipPath id="satClip"><use href="#satBody"/></clipPath>
+      </defs>
+      <!-- rings back -->
+      <ellipse cx="85" cy="62" rx="80" ry="16" fill="none" stroke="rgba(0,180,220,.25)" stroke-width="6"/>
+      <ellipse cx="85" cy="62" rx="68" ry="13" fill="none" stroke="rgba(0,180,220,.18)" stroke-width="4"/>
+      <!-- planet -->
+      <circle cx="85" cy="60" r="46" fill="url(#satGrad)"/>
+      <!-- cloud bands -->
+      <ellipse cx="85" cy="50" rx="38" ry="5" fill="rgba(30,120,180,.2)" clip-path="url(#satClip)"/>
+      <ellipse cx="85" cy="65" rx="38" ry="4" fill="rgba(20,100,160,.2)" clip-path="url(#satClip)"/>
+      <ellipse cx="85" cy="76" rx="32" ry="3" fill="rgba(10,80,140,.15)" clip-path="url(#satClip)"/>
+      <!-- shine -->
+      <circle cx="85" cy="60" r="46" fill="url(#satShine)"/>
+      <!-- rings front (lower half) -->
+      <path d="M5,62 Q85,85 165,62" fill="none" stroke="rgba(0,180,220,.22)" stroke-width="5.5"/>
+      <path d="M17,62 Q85,80 153,62" fill="none" stroke="rgba(0,180,220,.15)" stroke-width="3.5"/>
+    </svg>
+  </div>
+
+  <!-- Mars-like planet -->
+  <div class="planet-mars">
+    <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
+      <defs>
+        <radialGradient id="marsGrad" cx="38%" cy="32%" r="65%">
+          <stop offset="0%"   stop-color="#c84b1a"/>
+          <stop offset="55%"  stop-color="#8b2500"/>
+          <stop offset="100%" stop-color="#3d0f00"/>
+        </radialGradient>
+        <radialGradient id="marsShine" cx="35%" cy="28%" r="50%">
+          <stop offset="0%"   stop-color="rgba(255,120,60,.2)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <clipPath id="marsClip"><circle cx="65" cy="65" r="52"/></clipPath>
+      </defs>
+      <circle cx="65" cy="65" r="52" fill="url(#marsGrad)"/>
+      <!-- surface details -->
+      <circle cx="50" cy="48" r="10" fill="rgba(80,20,0,.35)" clip-path="url(#marsClip)"/>
+      <circle cx="80" cy="72" r="8"  fill="rgba(80,20,0,.28)" clip-path="url(#marsClip)"/>
+      <circle cx="55" cy="78" r="5"  fill="rgba(60,15,0,.2)"  clip-path="url(#marsClip)"/>
+      <ellipse cx="65" cy="30" rx="22" ry="6" fill="rgba(255,200,180,.12)" clip-path="url(#marsClip)"/>
+      <circle cx="65" cy="65" r="52" fill="url(#marsShine)"/>
+    </svg>
+  </div>
+
+  <!-- Mini purple planet -->
+  <div class="planet-mini">
+    <svg width="70" height="70" viewBox="0 0 70 70" fill="none">
+      <defs>
+        <radialGradient id="miniGrad" cx="36%" cy="30%" r="65%">
+          <stop offset="0%"   stop-color="#9b59d0"/>
+          <stop offset="100%" stop-color="#2d0060"/>
+        </radialGradient>
+      </defs>
+      <circle cx="35" cy="35" r="30" fill="url(#miniGrad)"/>
+      <circle cx="35" cy="35" r="30" fill="none" stroke="rgba(180,100,255,.2)" stroke-width="1"/>
+      <ellipse cx="35" cy="37" rx="28" ry="6" fill="none" stroke="rgba(180,100,255,.18)" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <!-- Astronaut -->
+  <div class="astronaut">
+    <svg width="90" height="120" viewBox="0 0 90 120" fill="none">
+      <defs>
+        <radialGradient id="helmetGrad" cx="38%" cy="30%" r="60%">
+          <stop offset="0%"   stop-color="#2a5a8a"/>
+          <stop offset="100%" stop-color="#0d2040"/>
+        </radialGradient>
+        <radialGradient id="visorGrad" cx="35%" cy="30%" r="65%">
+          <stop offset="0%"   stop-color="rgba(0,212,255,.5)"/>
+          <stop offset="100%" stop-color="rgba(0,80,140,.3)"/>
+        </radialGradient>
+      </defs>
+      <!-- tether rope -->
+      <path d="M60,30 Q100,10 115,50" fill="none" stroke="rgba(0,212,255,.35)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <!-- body / suit -->
+      <rect x="20" y="55" width="50" height="52" rx="16" fill="#1a3a5c"/>
+      <rect x="20" y="55" width="50" height="52" rx="16" fill="none" stroke="rgba(0,212,255,.25)" stroke-width="1.2"/>
+      <!-- chest panel -->
+      <rect x="30" y="65" width="30" height="22" rx="5" fill="rgba(0,212,255,.08)" stroke="rgba(0,212,255,.2)" stroke-width="1"/>
+      <rect x="34" y="70" width="8"  height="2" rx="1" fill="rgba(0,212,255,.5)"/>
+      <rect x="34" y="75" width="14" height="2" rx="1" fill="rgba(0,212,255,.3)"/>
+      <circle cx="50" cy="73" r="3" fill="rgba(0,212,255,.4)" stroke="rgba(0,212,255,.4)" stroke-width="1"/>
+      <!-- arms -->
+      <rect x="4"  y="58" width="18" height="32" rx="9" fill="#1a3a5c" stroke="rgba(0,212,255,.2)" stroke-width="1"/>
+      <rect x="68" y="58" width="18" height="32" rx="9" fill="#1a3a5c" stroke="rgba(0,212,255,.2)" stroke-width="1"/>
+      <!-- gloves -->
+      <ellipse cx="13" cy="93" rx="9" ry="6" fill="#0d2030"/>
+      <ellipse cx="77" cy="93" rx="9" ry="6" fill="#0d2030"/>
+      <!-- legs -->
+      <rect x="24" y="100" width="16" height="18" rx="6" fill="#152c48"/>
+      <rect x="50" y="100" width="16" height="18" rx="6" fill="#152c48"/>
+      <!-- boots -->
+      <rect x="20" y="112" width="22" height="8"  rx="4" fill="#0d1f35"/>
+      <rect x="48" y="112" width="22" height="8"  rx="4" fill="#0d1f35"/>
+      <!-- helmet -->
+      <ellipse cx="45" cy="36" rx="26" ry="28" fill="url(#helmetGrad)" stroke="rgba(0,212,255,.3)" stroke-width="1.5"/>
+      <!-- visor -->
+      <ellipse cx="45" cy="34" rx="17" ry="16" fill="url(#visorGrad)"/>
+      <ellipse cx="41" cy="29" rx="5"  ry="3"  fill="rgba(255,255,255,.15)"/>
+      <!-- helmet shine -->
+      <ellipse cx="35" cy="24" rx="8" ry="5" fill="rgba(255,255,255,.08)"/>
+      <!-- antenna -->
+      <line x1="58" y1="10" x2="58" y2="20" stroke="rgba(0,212,255,.6)" stroke-width="2"/>
+      <circle cx="58" cy="8" r="3" fill="var(--cyan)" opacity=".8"/>
+    </svg>
+  </div>
+
+  <!-- Satellite -->
+  <div class="satellite">
+    <svg width="70" height="44" viewBox="0 0 70 44" fill="none">
+      <rect x="22" y="14" width="26" height="16" rx="4" fill="#0a2040" stroke="rgba(0,212,255,.3)" stroke-width="1"/>
+      <rect x="2"  y="16" width="18" height="12" rx="2" fill="rgba(0,100,180,.4)" stroke="rgba(0,212,255,.2)" stroke-width="1"/>
+      <rect x="50" y="16" width="18" height="12" rx="2" fill="rgba(0,100,180,.4)" stroke="rgba(0,212,255,.2)" stroke-width="1"/>
+      <line x1="20" y1="22" x2="22" y2="22" stroke="rgba(0,212,255,.4)" stroke-width="1.5"/>
+      <line x1="48" y1="22" x2="50" y2="22" stroke="rgba(0,212,255,.4)" stroke-width="1.5"/>
+      <circle cx="35" cy="22" r="3" fill="rgba(0,212,255,.3)"/>
+      <line x1="35" y1="2"  x2="35" y2="12" stroke="rgba(0,212,255,.35)" stroke-width="1"/>
+      <circle cx="35" cy="1" r="2" fill="rgba(0,212,255,.5)"/>
+    </svg>
+  </div>
+
+  <!-- Meteors -->
+  <div class="meteor" style="--mt:8%;--ml:-5%;--mw:160px;--md:6s;--mde:0s"></div>
+  <div class="meteor" style="--mt:22%;--ml:-5%;--mw:100px;--md:8s;--mde:3.5s"></div>
+  <div class="meteor" style="--mt:60%;--ml:-5%;--mw:130px;--md:5s;--mde:7s"></div>
+  <div class="meteor" style="--mt:80%;--ml:-5%;--mw:90px; --md:9s;--mde:2s"></div>
+
+  <!-- Sparkles -->
+  <div class="sparkle" style="top:18%;left:30%;--spk-s:12px;--spk-d:2.5s;--spk-de:0s">✦</div>
+  <div class="sparkle" style="top:70%;left:55%;--spk-s:10px;--spk-d:3s;--spk-de:1s">✦</div>
+  <div class="sparkle" style="top:35%;left:75%;--spk-s:8px;--spk-d:2s;--spk-de:.5s">✦</div>
+  <div class="sparkle" style="top:85%;left:20%;--spk-s:14px;--spk-d:3.5s;--spk-de:2s">✦</div>
+  <div class="sparkle" style="top:45%;left:90%;--spk-s:10px;--spk-d:2.2s;--spk-de:1.5s">✦</div>
+</div>
+
+<!-- HUD CORNERS -->
+<div class="hud-corner tl"></div>
+<div class="hud-corner tr"></div>
+<div class="hud-corner bl"></div>
+<div class="hud-corner br"></div>
+<div class="scanline"></div>
+
+<!-- ── COUNTDOWN ── -->
+<div id="countdown-screen">
+  <p class="cd-mission-label">⬡ incoming transmission ⬡</p>
+  <div class="cd-outer">
+    <svg class="cd-svg" viewBox="0 0 220 220">
+      <defs>
+        <linearGradient id="cdGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#00d4ff"/>
+          <stop offset="100%" stop-color="#7b2fff"/>
+        </linearGradient>
+      </defs>
+      <circle cx="110" cy="110" r="105" class="cd-track"/>
+      <circle cx="110" cy="110" r="105" class="cd-prog" id="cd-ring"/>
+    </svg>
+    <div class="cd-glow-ring"></div>
+    <span id="cd-number">10</span>
+  </div>
+  <p class="cd-status">standby — decrypting signal</p>
+</div>
+
+<!-- ── CAPSULE STAGE ── -->
+<div id="capsule-stage">
+  <p class="cap-label">⬡ tap capsule to open transmission ⬡</p>
+  <div class="capsule-wrap" onclick="openCapsule()">
+    <div class="capsule" id="capsule">
+      <div class="cap-body"></div>
+      <div class="cap-flap"><div class="cap-flap-face"></div></div>
+      <div class="cap-seal">🚀</div>
+      <div class="cap-inner-peek"><span>encrypted · · ·</span></div>
+    </div>
+    <div class="cap-signal" style="--sig-d:0s"></div>
+    <div class="cap-signal" style="--sig-d:1s"></div>
+    <div class="cap-signal" style="--sig-d:2s"></div>
+  </div>
+</div>
+
+<!-- ── BIRTHDAY CARD ── -->
+<div id="card-screen">
+  <div class="card">
+    <div class="card-topbar"></div>
+    <div class="card-corner tl"></div>
+    <div class="card-corner tr"></div>
+    <div class="card-corner bl"></div>
+    <div class="card-corner br"></div>
+    <span class="card-icon">🚀</span>
+    <p class="card-tag">⬡ transmission decrypted ⬡</p>
+    <h1 class="card-title">Happy Birthday</h1>
+    <h2 class="card-name" id="card-name">Explorer</h2>
+    <div class="card-divider"><span>✦</span></div>
+    <p class="card-message" id="card-msg">
+      Di antara jutaan bintang di galaksi ini,<br>
+      kamu adalah <strong>yang paling bersinar</strong>. 🌟<br><br>
+      Semoga setiap mimpimu melesat seperti roket —<br>
+      menembus batas, menjelajahi yang belum pernah ada.<br><br>
+      Selamat ulang tahun, <strong>penjelajah terbaik</strong>ku. 🪐
+    </p>
+    <div class="card-tags">
+      <span class="card-badge">🌌 Ad Astra</span>
+      <span class="card-badge">✦ Happy Birthday</span>
+      <span class="card-badge">🛸 Keep Exploring</span>
+    </div>
+    <p class="card-sign">transmitted with love, <span id="card-from">Mission Control</span></p>
+  </div>
+</div>
+
+<!-- ── LOGOUT BUTTON ── -->
+<button id="logout-btn" onclick="startLogout()">
+  <span class="btn-icon">🚀</span>
+  <span>End Mission</span>
+</button>
+
+<!-- ── LOGOUT OVERLAY ── -->
+<div id="logout-overlay">
+  <canvas id="warp-canvas"></canvas>
+  <div class="logout-static" id="logout-static"></div>
+  <div id="logout-rocket">🚀</div>
+  <div class="logout-glitch" id="logout-glitch">
+    <p class="logout-title">MISSION COMPLETE</p>
+    <p class="logout-sub">⬡ closing transmission ⬡</p>
+    <div class="logout-bar-wrap"><div class="logout-bar" id="logout-bar"></div></div>
+  </div>
+  <div id="logout-blackout"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   ✏️  KONFIGURASI
+═══════════════════════════════════════ */
+const NAMA      = "Sahabatku";       // ← nama sahabat
+const DARI      = "Sahabatmu";       // ← nama pengirim
+const COUNTDOWN = 10;                // ← hitungan mundur
+/* ═══════════════════════════════════════ */
+
+document.getElementById('card-name').textContent = NAMA;
+document.getElementById('card-from').textContent = DARI;
+
+/* ─── STAR FIELD ─── */
+const canvas = document.getElementById('starfield');
+const ctx    = canvas.getContext('2d');
+let W, H;
+const resize = () => { W = canvas.width = innerWidth; H = canvas.height = innerHeight; };
+resize(); window.addEventListener('resize', resize);
+
+const stars = Array.from({length: 250}, () => ({
+  x: Math.random(), y: Math.random(),
+  r: Math.random() * 1.4 + .2,
+  baseOp: Math.random() * .7 + .2,
+  op: 0, dOp: (Math.random() * .006 + .002) * (Math.random() > .5 ? 1 : -1),
+  color: Math.random() > .85 ? '#00d4ff' : Math.random() > .9 ? '#7b2fff' : '#ffffff'
+}));
+stars.forEach(s => { s.op = s.baseOp; });
+
+function drawStars() {
+  ctx.clearRect(0, 0, W, H);
+  stars.forEach(s => {
+    s.op += s.dOp;
+    if (s.op > s.baseOp + .3 || s.op < s.baseOp - .3) s.dOp *= -1;
+    ctx.beginPath();
+    ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = s.color;
+    ctx.globalAlpha = Math.max(0, Math.min(1, s.op));
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+/* ─── COUNTDOWN ─── */
+const cdEl   = document.getElementById('cd-number');
+const cdScr  = document.getElementById('countdown-screen');
+const ringEl = document.getElementById('cd-ring');
+const capStg = document.getElementById('capsule-stage');
+const CIRC   = 2 * Math.PI * 105;
+
+ringEl.style.strokeDashoffset = CIRC;
+let count = COUNTDOWN;
+
+function tick() {
+  cdEl.classList.add('pop');
+  setTimeout(() => cdEl.classList.remove('pop'), 140);
+  const progress = (COUNTDOWN - count) / COUNTDOWN;
+  ringEl.style.strokeDashoffset = CIRC * (1 - progress);
+
+  if (count <= 0) {
+    cdScr.classList.add('hide');
+    setTimeout(() => capStg.classList.add('show'), 900);
+    return;
+  }
+  cdEl.textContent = count;
+  count--;
+  setTimeout(tick, 1000);
+}
+setTimeout(tick, 600);
+
+/* ─── OPEN CAPSULE ─── */
+let opened = false;
+function openCapsule() {
+  if (opened) return;
+  opened = true;
+  document.getElementById('capsule').classList.add('open');
+  setTimeout(() => {
+    capStg.style.opacity = '0';
+    capStg.style.transition = 'opacity .5s ease';
+    capStg.style.pointerEvents = 'none';
+    document.getElementById('card-screen').classList.add('show');
+    spawnParticles();
+    // show logout button after card reveals
+    setTimeout(() => document.getElementById('logout-btn').classList.add('visible'), 1200);
+  }, 950);
+}
+
+/* ─── PARTICLES ─── */
+const pcols = ['#00d4ff','#7b2fff','#ffffff','#00ffd1','#ff6b35'];
+function spawnParticles() {
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const isCircle = Math.random() > .5;
+    p.style.cssText = `
+      left:${(Math.random()*100).toFixed(0)}%;
+      width:${(Math.random()*5+3).toFixed(0)}px;
+      height:${isCircle ? (Math.random()*5+3).toFixed(0)+'px' : (Math.random()*8+5).toFixed(0)+'px'};
+      background:${pcols[~~(Math.random()*pcols.length)]};
+      border-radius:${isCircle?'50%':'2px'};
+      --pt:${(Math.random()*3+3.5).toFixed(1)}s;
+      --pd:${(Math.random()*3).toFixed(1)}s;
+      --px:${(~~(Math.random()*120-60))}px;
+      box-shadow:0 0 6px currentColor;
+    `;
+    document.body.appendChild(p);
+  }
+}
+
+/* ═══════════════════════════════════════
+   LOGOUT ANIMATION
+═══════════════════════════════════════ */
+function startLogout() {
+  const overlay  = document.getElementById('logout-overlay');
+  const rocket   = document.getElementById('logout-rocket');
+  const warpC    = document.getElementById('warp-canvas');
+  const glitch   = document.getElementById('logout-glitch');
+  const bar      = document.getElementById('logout-bar');
+  const staticEl = document.getElementById('logout-static');
+  const blackout = document.getElementById('logout-blackout');
+
+  // Show overlay, fade in
+  overlay.style.display = 'block';
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .5s ease';
+  overlay.style.pointerEvents = 'all';
+  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+
+  // 1. Warp canvas starts
+  const wc = warpC.getContext('2d');
+  warpC.width  = innerWidth;
+  warpC.height = innerHeight;
+  warpC.classList.add('show');
+
+  // Warp lines (star-streaks flying inward → outward)
+  const warpStars = Array.from({length: 200}, () => ({
+    angle: Math.random() * Math.PI * 2,
+    dist:  Math.random() * 0.3,
+    speed: Math.random() * 6 + 2,
+    len:   Math.random() * 0.04 + 0.02,
+    col:   Math.random() > .6 ? '#00d4ff' : Math.random() > .5 ? '#7b2fff' : '#ffffff',
+    opacity: Math.random() * 0.8 + 0.2
+  }));
+
+  let warpActive = true;
+  let warpIntensity = 0;
+
+  function drawWarp() {
+    if (!warpActive) return;
+    warpIntensity = Math.min(warpIntensity + 0.02, 1);
+    wc.fillStyle = `rgba(2,10,24,${0.25 - warpIntensity * 0.1})`;
+    wc.fillRect(0, 0, warpC.width, warpC.height);
+
+    const cx = warpC.width  / 2;
+    const cy = warpC.height / 2;
+    const maxR = Math.sqrt(cx*cx + cy*cy);
+
+    warpStars.forEach(s => {
+      s.dist += s.speed * 0.003 * (1 + warpIntensity * 3);
+      if (s.dist > 1.1) { s.dist = 0.01; s.angle = Math.random() * Math.PI * 2; }
+
+      const x1 = cx + Math.cos(s.angle) * s.dist * maxR;
+      const y1 = cy + Math.sin(s.angle) * s.dist * maxR;
+      const x2 = cx + Math.cos(s.angle) * (s.dist + s.len * (1 + warpIntensity * 2)) * maxR;
+      const y2 = cy + Math.sin(s.angle) * (s.dist + s.len * (1 + warpIntensity * 2)) * maxR;
+
+      const grad = wc.createLinearGradient(x1, y1, x2, y2);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(1, s.col);
+
+      wc.beginPath();
+      wc.strokeStyle = grad;
+      wc.lineWidth = Math.max(0.5, s.dist * 2.5 * warpIntensity);
+      wc.globalAlpha = s.opacity * Math.min(1, s.dist * 3);
+      wc.moveTo(x1, y1);
+      wc.lineTo(x2, y2);
+      wc.stroke();
+      wc.globalAlpha = 1;
+    });
+    requestAnimationFrame(drawWarp);
+  }
+  drawWarp();
+
+  // 2. Rocket launches after 300ms
+  setTimeout(() => { rocket.classList.add('launch'); }, 300);
+
+  // 3. Static flicker at 800ms
+  setTimeout(() => { staticEl.classList.add('show'); }, 800);
+
+  // 4. Show "MISSION COMPLETE" glitch text at 1.2s
+  setTimeout(() => {
+    glitch.classList.add('show');
+    setTimeout(() => { bar.classList.add('fill'); }, 100);
+  }, 1200);
+
+  // 5. Progress bar fills, then blackout at 3.4s
+  setTimeout(() => {
+    warpActive = false;
+    staticEl.classList.remove('show');
+    blackout.classList.add('fade');
+  }, 3400);
+
+  // 6. Final: reload / reset page at 4.5s
+  setTimeout(() => {
+    // Reload the page to "logout"
+    window.location.reload();
+  }, 4500);
+}
+</script>
+</body>
+</html>
