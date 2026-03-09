@@ -1076,94 +1076,113 @@ html,body{height:100%;overflow:hidden;background:var(--space);font-family:'Exo 2
 
 <script>
 /* ═══════════════════════════════════════
-   ✏️  KONFIGURASI
+   ✏️  KONFIGURASI — edit di sini
 ═══════════════════════════════════════ */
-const NAMA      = "Sahabatku";       // ← nama sahabat
-const DARI      = "Sahabatmu";       // ← nama pengirim
-const COUNTDOWN = 10;                // ← hitungan mundur
+const NAMA      = "Sahabatku";   // ← nama sahabat
+const DARI      = "Sahabatmu";   // ← nama pengirim
+const COUNTDOWN = 10;            // ← hitungan mundur (detik)
 /* ═══════════════════════════════════════ */
 
+// ── Isi nama di kartu & welcome ──
 document.getElementById('card-name').textContent = NAMA;
 document.getElementById('card-from').textContent = DARI;
 document.getElementById('wb-name').textContent   = NAMA;
 
-/* ─── WELCOME STARS ─── */
+// ── Referensi elemen utama ──
+const cdScr  = document.getElementById('countdown-screen');
+const capStg = document.getElementById('capsule-stage');
+const cdEl   = document.getElementById('cd-number');
+const ringEl = document.getElementById('cd-ring');
+const CIRC   = 2 * Math.PI * 105;
+
+// ── Sembunyikan countdown & capsule dari awal ──
+// (pakai style langsung, BUKAN class, supaya bisa di-override nanti)
+cdScr.style.cssText  = 'opacity:0;pointer-events:none;transition:none;';
+capStg.style.cssText = 'opacity:0;pointer-events:none;';
+
+// ── Buat bintang-bintang di welcome screen ──
 const wbStarsEl = document.getElementById('wb-stars');
 for (let i = 0; i < 80; i++) {
-  const s = document.createElement('div');
+  const s  = document.createElement('div');
   s.className = 'wb-star';
-  const sz = (Math.random() * 2.5 + .5).toFixed(1);
-  s.style.cssText = `
-    width:${sz}px;height:${sz}px;
-    left:${(Math.random()*100).toFixed(1)}%;
-    top:${(Math.random()*100).toFixed(1)}%;
-    --ws-d:${(Math.random()*3+1.5).toFixed(1)}s;
-    --ws-de:${(Math.random()*4).toFixed(1)}s;
-    opacity:.1;
-  `;
+  const sz = (Math.random() * 2.5 + 0.5).toFixed(1);
+  s.style.cssText =
+    `width:${sz}px;height:${sz}px;` +
+    `left:${(Math.random()*100).toFixed(1)}%;` +
+    `top:${(Math.random()*100).toFixed(1)}%;` +
+    `--ws-d:${(Math.random()*3+1.5).toFixed(1)}s;` +
+    `--ws-de:${(Math.random()*4).toFixed(1)}s;`;
   wbStarsEl.appendChild(s);
 }
 
-/* ─── HIDE COUNTDOWN & CAPSULE initially ─── */
-const cdScr  = document.getElementById('countdown-screen');
-const capStg = document.getElementById('capsule-stage');
-cdScr.style.opacity = '0';
-cdScr.style.pointerEvents = 'none';
-
-/* ─── START MISSION (welcome → countdown) ─── */
+// ────────────────────────────────────────
+//  START MISSION — welcome → countdown
+// ────────────────────────────────────────
 function startMission() {
   const wb = document.getElementById('welcome-screen');
 
-  // Spawn shooting stars burst
-  for (let i = 0; i < 12; i++) {
+  // Tembakkan bintang jatuh saat transisi
+  for (let i = 0; i < 14; i++) {
     const sh = document.createElement('div');
     sh.className = 'wb-shoot';
-    sh.style.cssText = `
-      --sh-t:${(Math.random()*90+5).toFixed(0)}%;
-      --sh-w:${(Math.random()*120+60).toFixed(0)}px;
-      --sh-r:${(Math.random()*40-20).toFixed(0)}deg;
-      --sh-d:${(Math.random()*.6+.8).toFixed(2)}s;
-      --sh-de:${(Math.random()*.4).toFixed(2)}s;
-    `;
+    sh.style.cssText =
+      `--sh-t:${(Math.random()*90+5).toFixed(0)}%;` +
+      `--sh-w:${(Math.random()*120+60).toFixed(0)}px;` +
+      `--sh-r:${(Math.random()*40-20).toFixed(0)}deg;` +
+      `--sh-d:${(Math.random()*0.6+0.8).toFixed(2)}s;` +
+      `--sh-de:${(Math.random()*0.4).toFixed(2)}s;`;
     wb.appendChild(sh);
   }
 
-  // Fade out welcome after short burst
+  // Fade out welcome screen
   setTimeout(() => {
-    wb.classList.add('hide');
+    wb.style.transition = 'opacity 0.9s ease, transform 0.9s ease';
+    wb.style.opacity    = '0';
+    wb.style.transform  = 'scale(1.06)';
+    wb.style.pointerEvents = 'none';
+
     setTimeout(() => {
       wb.style.display = 'none';
-      // Fade in countdown
-      cdScr.style.transition = 'opacity .8s ease';
-      cdScr.style.opacity = '1';
+
+      // Tampilkan countdown dengan fade in
+      cdScr.style.transition    = 'opacity 0.8s ease';
+      cdScr.style.opacity       = '1';
       cdScr.style.pointerEvents = 'all';
-      // Start ticking
-      setTimeout(tick, 600);
+
+      // Reset dan mulai hitung mundur
+      count = COUNTDOWN;
+      cdEl.textContent = COUNTDOWN;
+      ringEl.style.strokeDashoffset = CIRC;
+      setTimeout(tick, 800);
     }, 900);
-  }, 400);
+  }, 350);
 }
 
-/* ─── STAR FIELD ─── */
+// ────────────────────────────────────────
+//  STARFIELD CANVAS
+// ────────────────────────────────────────
 const canvas = document.getElementById('starfield');
 const ctx    = canvas.getContext('2d');
 let W, H;
 const resize = () => { W = canvas.width = innerWidth; H = canvas.height = innerHeight; };
-resize(); window.addEventListener('resize', resize);
+resize();
+window.addEventListener('resize', resize);
 
 const stars = Array.from({length: 250}, () => ({
   x: Math.random(), y: Math.random(),
-  r: Math.random() * 1.4 + .2,
-  baseOp: Math.random() * .7 + .2,
-  op: 0, dOp: (Math.random() * .006 + .002) * (Math.random() > .5 ? 1 : -1),
-  color: Math.random() > .85 ? '#00d4ff' : Math.random() > .9 ? '#7b2fff' : '#ffffff'
+  r: Math.random() * 1.4 + 0.2,
+  baseOp: Math.random() * 0.7 + 0.2,
+  op: 0,
+  dOp: (Math.random() * 0.006 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
+  color: Math.random() > 0.85 ? '#00d4ff' : Math.random() > 0.9 ? '#7b2fff' : '#ffffff'
 }));
-stars.forEach(s => { s.op = s.baseOp; });
+stars.forEach(s => s.op = s.baseOp);
 
-function drawStars() {
+(function drawStars() {
   ctx.clearRect(0, 0, W, H);
   stars.forEach(s => {
     s.op += s.dOp;
-    if (s.op > s.baseOp + .3 || s.op < s.baseOp - .3) s.dOp *= -1;
+    if (s.op > s.baseOp + 0.3 || s.op < s.baseOp - 0.3) s.dOp *= -1;
     ctx.beginPath();
     ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
     ctx.fillStyle = s.color;
@@ -1172,74 +1191,96 @@ function drawStars() {
   });
   ctx.globalAlpha = 1;
   requestAnimationFrame(drawStars);
-}
-drawStars();
+})();
 
-/* ─── COUNTDOWN ─── */
-const cdEl   = document.getElementById('cd-number');
-const ringEl = document.getElementById('cd-ring');
-const CIRC   = 2 * Math.PI * 105;
-
-ringEl.style.strokeDashoffset = CIRC;
+// ────────────────────────────────────────
+//  COUNTDOWN
+// ────────────────────────────────────────
 let count = COUNTDOWN;
 
 function tick() {
+  // 1. Tampilkan angka SEKARANG (bukan setelah decrement)
+  cdEl.textContent = count;
+
+  // 2. Animasi pop
   cdEl.classList.add('pop');
   setTimeout(() => cdEl.classList.remove('pop'), 140);
+
+  // 3. Update cincin progress
   const progress = (COUNTDOWN - count) / COUNTDOWN;
   ringEl.style.strokeDashoffset = CIRC * (1 - progress);
 
+  // 4. Kalau sudah 0 → sembunyikan countdown, tampilkan kapsul
   if (count <= 0) {
-    cdScr.classList.add('hide');
-    setTimeout(() => capStg.classList.add('show'), 900);
+    // PENTING: set style langsung (inline style tidak bisa di-override oleh class)
+    cdScr.style.transition    = 'opacity 0.9s ease, transform 0.9s ease';
+    cdScr.style.opacity       = '0';
+    cdScr.style.transform     = 'scale(1.08)';
+    cdScr.style.pointerEvents = 'none';
+    setTimeout(() => {
+      cdScr.style.display = 'none';
+      // Tampilkan kapsul
+      capStg.style.transition    = 'opacity 0.8s ease';
+      capStg.style.opacity       = '1';
+      capStg.style.pointerEvents = 'all';
+    }, 900);
     return;
   }
-  cdEl.textContent = count;
+
+  // 5. Lanjut hitung mundur
   count--;
   setTimeout(tick, 1000);
 }
 
-/* ─── OPEN CAPSULE ─── */
+// ────────────────────────────────────────
+//  BUKA KAPSUL
+// ────────────────────────────────────────
 let opened = false;
 function openCapsule() {
   if (opened) return;
   opened = true;
   document.getElementById('capsule').classList.add('open');
+
   setTimeout(() => {
-    capStg.style.opacity = '0';
-    capStg.style.transition = 'opacity .5s ease';
+    // Sembunyikan kapsul
+    capStg.style.transition    = 'opacity 0.5s ease';
+    capStg.style.opacity       = '0';
     capStg.style.pointerEvents = 'none';
+    // Tampilkan kartu
     document.getElementById('card-screen').classList.add('show');
     spawnParticles();
+    // Muncul tombol End Mission
     setTimeout(() => document.getElementById('logout-btn').classList.add('visible'), 1200);
   }, 950);
 }
 
-/* ─── PARTICLES ─── */
+// ────────────────────────────────────────
+//  PARTICLES (confetti saat kartu terbuka)
+// ────────────────────────────────────────
 const pcols = ['#00d4ff','#7b2fff','#ffffff','#00ffd1','#ff6b35'];
 function spawnParticles() {
   for (let i = 0; i < 80; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
-    const isCircle = Math.random() > .5;
-    p.style.cssText = `
-      left:${(Math.random()*100).toFixed(0)}%;
-      width:${(Math.random()*5+3).toFixed(0)}px;
-      height:${isCircle ? (Math.random()*5+3).toFixed(0)+'px' : (Math.random()*8+5).toFixed(0)+'px'};
-      background:${pcols[~~(Math.random()*pcols.length)]};
-      border-radius:${isCircle?'50%':'2px'};
-      --pt:${(Math.random()*3+3.5).toFixed(1)}s;
-      --pd:${(Math.random()*3).toFixed(1)}s;
-      --px:${(~~(Math.random()*120-60))}px;
-      box-shadow:0 0 6px currentColor;
-    `;
+    const circle = Math.random() > 0.5;
+    const sz1 = (Math.random()*5+3).toFixed(0);
+    const sz2 = (Math.random()*8+5).toFixed(0);
+    p.style.cssText =
+      `left:${(Math.random()*100).toFixed(0)}%;` +
+      `width:${sz1}px;height:${circle ? sz1 : sz2}px;` +
+      `background:${pcols[~~(Math.random()*pcols.length)]};` +
+      `border-radius:${circle ? '50%' : '2px'};` +
+      `--pt:${(Math.random()*3+3.5).toFixed(1)}s;` +
+      `--pd:${(Math.random()*3).toFixed(1)}s;` +
+      `--px:${~~(Math.random()*120-60)}px;` +
+      `box-shadow:0 0 6px currentColor;`;
     document.body.appendChild(p);
   }
 }
 
-/* ═══════════════════════════════════════
-   LOGOUT ANIMATION
-═══════════════════════════════════════ */
+// ────────────────────────────────────────
+//  LOGOUT / END MISSION
+// ────────────────────────────────────────
 function startLogout() {
   const overlay  = document.getElementById('logout-overlay');
   const rocket   = document.getElementById('logout-rocket');
@@ -1249,30 +1290,31 @@ function startLogout() {
   const staticEl = document.getElementById('logout-static');
   const blackout = document.getElementById('logout-blackout');
 
-  overlay.style.display = 'block';
-  overlay.style.opacity = '0';
-  overlay.style.transition = 'opacity .5s ease';
+  // Tampilkan overlay
+  overlay.style.display      = 'block';
+  overlay.style.opacity      = '0';
+  overlay.style.transition   = 'opacity 0.5s ease';
   overlay.style.pointerEvents = 'all';
-  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+  requestAnimationFrame(() => overlay.style.opacity = '1');
 
+  // Warp canvas
   const wc = warpC.getContext('2d');
   warpC.width  = innerWidth;
   warpC.height = innerHeight;
   warpC.classList.add('show');
 
   const warpStars = Array.from({length: 200}, () => ({
-    angle: Math.random() * Math.PI * 2,
-    dist:  Math.random() * 0.3,
-    speed: Math.random() * 6 + 2,
-    len:   Math.random() * 0.04 + 0.02,
-    col:   Math.random() > .6 ? '#00d4ff' : Math.random() > .5 ? '#7b2fff' : '#ffffff',
+    angle:   Math.random() * Math.PI * 2,
+    dist:    Math.random() * 0.3,
+    speed:   Math.random() * 6 + 2,
+    len:     Math.random() * 0.04 + 0.02,
+    col:     Math.random() > 0.6 ? '#00d4ff' : Math.random() > 0.5 ? '#7b2fff' : '#ffffff',
     opacity: Math.random() * 0.8 + 0.2
   }));
 
-  let warpActive = true;
-  let warpIntensity = 0;
+  let warpActive = true, warpIntensity = 0;
 
-  function drawWarp() {
+  (function drawWarp() {
     if (!warpActive) return;
     warpIntensity = Math.min(warpIntensity + 0.02, 1);
     wc.fillStyle = `rgba(2,10,24,${0.25 - warpIntensity * 0.1})`;
@@ -1286,25 +1328,24 @@ function startLogout() {
       const y1 = cy + Math.sin(s.angle) * s.dist * maxR;
       const x2 = cx + Math.cos(s.angle) * (s.dist + s.len * (1 + warpIntensity * 2)) * maxR;
       const y2 = cy + Math.sin(s.angle) * (s.dist + s.len * (1 + warpIntensity * 2)) * maxR;
-      const grad = wc.createLinearGradient(x1, y1, x2, y2);
-      grad.addColorStop(0, 'transparent');
-      grad.addColorStop(1, s.col);
+      const g = wc.createLinearGradient(x1, y1, x2, y2);
+      g.addColorStop(0, 'transparent');
+      g.addColorStop(1, s.col);
       wc.beginPath();
-      wc.strokeStyle = grad;
-      wc.lineWidth = Math.max(0.5, s.dist * 2.5 * warpIntensity);
+      wc.strokeStyle = g;
+      wc.lineWidth   = Math.max(0.5, s.dist * 2.5 * warpIntensity);
       wc.globalAlpha = s.opacity * Math.min(1, s.dist * 3);
       wc.moveTo(x1, y1); wc.lineTo(x2, y2); wc.stroke();
       wc.globalAlpha = 1;
     });
     requestAnimationFrame(drawWarp);
-  }
-  drawWarp();
+  })();
 
-  setTimeout(() => { rocket.classList.add('launch'); }, 300);
-  setTimeout(() => { staticEl.classList.add('show'); }, 800);
+  setTimeout(() => rocket.classList.add('launch'), 300);
+  setTimeout(() => staticEl.classList.add('show'), 800);
   setTimeout(() => {
     glitch.classList.add('show');
-    setTimeout(() => { bar.classList.add('fill'); }, 100);
+    setTimeout(() => bar.classList.add('fill'), 100);
   }, 1200);
   setTimeout(() => {
     warpActive = false;
@@ -1312,17 +1353,19 @@ function startLogout() {
     blackout.classList.add('fade');
   }, 3400);
 
-  // Close the tab/window
+  // Tutup tab
   setTimeout(() => {
     window.open('', '_self');
     window.close();
-    // Fallback jika window.close() diblokir browser
-    document.body.innerHTML = `
-      <div style="position:fixed;inset:0;background:#020a18;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Orbitron',monospace;color:#00d4ff;text-align:center;gap:16px;">
-        <div style="font-size:48px">🚀</div>
-        <div style="font-size:14px;letter-spacing:4px;text-transform:uppercase">Mission Complete</div>
-        <div style="font-size:10px;letter-spacing:3px;color:rgba(0,212,255,.4);margin-top:8px">Kamu bisa menutup tab ini</div>
-      </div>`;
+    // Fallback jika browser memblokir window.close()
+    document.body.innerHTML =
+      '<div style="position:fixed;inset:0;background:#020a18;display:flex;' +
+      'flex-direction:column;align-items:center;justify-content:center;' +
+      'font-family:monospace;color:#00d4ff;text-align:center;gap:16px;">' +
+      '<div style="font-size:52px">🚀</div>' +
+      '<div style="font-size:14px;letter-spacing:4px;text-transform:uppercase">Mission Complete</div>' +
+      '<div style="font-size:11px;letter-spacing:2px;color:rgba(0,212,255,.45);margin-top:8px">' +
+      'Kamu bisa menutup tab ini</div></div>';
   }, 4500);
 }
 </script>
